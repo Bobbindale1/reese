@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ModeToggle } from "@/components/ModeToggle";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { WatchButton } from "@/components/WatchButton";
@@ -6,12 +7,16 @@ import { DayNavigation } from "@/components/DayNavigation";
 import { ProgressDashboard } from "@/components/ProgressDashboard";
 import { VideoList } from "@/components/VideoList";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { getVideoByDay, getAllVideos, getDayOfYear, getDateForDay, formatDate } from "@/lib/videoData";
-import { BookOpen } from "lucide-react";
+import { BibleVideo, fetchVideos, getVideoByDay, getDayOfYear, getDateForDay, formatDate } from "@/lib/videoData";
+import { BookOpen, Loader2 } from "lucide-react";
 
 type ViewMode = "calendar" | "dayNumber";
 
 export default function Home() {
+  const { data: videos, isLoading, error } = useQuery<BibleVideo[]>({
+    queryKey: ["/api/videos"],
+  });
+
   const [mode, setMode] = useState<ViewMode>(() => {
     const stored = localStorage.getItem("viewMode");
     return (stored as ViewMode) || "calendar";
@@ -23,7 +28,6 @@ export default function Home() {
     return mode === "calendar" ? getDayOfYear() : 1;
   });
   
-  // todo: remove mock functionality - replace with server-side storage
   const [watchedDays, setWatchedDays] = useState<Set<number>>(() => {
     const stored = localStorage.getItem("watchedDays");
     if (stored) {
@@ -63,19 +67,6 @@ export default function Home() {
     });
   };
 
-  const currentVideo = getVideoByDay(currentDay);
-  const currentDate = getDateForDay(currentDay);
-  const formattedDate = formatDate(currentDate);
-  
-  const allVideos = getAllVideos();
-  const videoListItems = allVideos.slice(0, 50).map(v => ({
-    dayNumber: v.dayNumber,
-    title: v.title,
-    isWatched: watchedDays.has(v.dayNumber),
-    calendarDate: formatDate(getDateForDay(v.dayNumber)),
-  }));
-
-  // Calculate streak
   const calculateStreak = () => {
     let streak = 0;
     const today = getDayOfYear();
@@ -89,10 +80,43 @@ export default function Home() {
     return streak;
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground" data-testid="text-loading">Loading Bible reading videos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-destructive mb-2" data-testid="text-error">Error loading videos</p>
+          <p className="text-muted-foreground text-sm">Please try refreshing the page.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const currentVideo = videos ? getVideoByDay(videos, currentDay) : undefined;
+  const currentDate = getDateForDay(currentDay);
+  const formattedDate = formatDate(currentDate);
+  
+  const videoListItems = (videos || []).slice(0, 50).map(v => ({
+    dayNumber: v.dayNumber,
+    title: v.title,
+    isWatched: watchedDays.has(v.dayNumber),
+    calendarDate: formatDate(getDateForDay(v.dayNumber)),
+  }));
+
   if (!currentVideo) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Video not found</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground" data-testid="text-not-found">Video not found for day {currentDay}</p>
       </div>
     );
   }
@@ -130,7 +154,7 @@ export default function Home() {
             
             <DayNavigation
               currentDay={currentDay}
-              totalDays={365}
+              totalDays={videos?.length || 365}
               mode={mode}
               onNavigate={setCurrentDay}
               currentDate={formattedDate}
@@ -140,7 +164,7 @@ export default function Home() {
           <div className="space-y-6">
             <ProgressDashboard
               totalWatched={watchedDays.size}
-              totalVideos={365}
+              totalVideos={videos?.length || 365}
               currentStreak={calculateStreak()}
             />
             
