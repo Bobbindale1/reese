@@ -5,6 +5,7 @@ import { VideoPlayer } from "@/components/VideoPlayer";
 import { WatchButton } from "@/components/WatchButton";
 import { DayNavigation } from "@/components/DayNavigation";
 import { ProgressDashboard } from "@/components/ProgressDashboard";
+import { JumpToDate } from "@/components/JumpToDate";
 import { VideoList } from "@/components/VideoList";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BibleVideo, fetchVideos, getVideoByDay, getDayOfYear, getDateForDay, formatDate } from "@/lib/videoData";
@@ -166,6 +167,11 @@ export default function Home() {
               totalWatched={watchedDays.size}
               totalVideos={videos?.length || 365}
               currentStreak={calculateStreak()}
+            />
+            
+            <JumpToDate
+              onNavigate={setCurrentDay}
+              totalDays={videos?.length || 365}
             />
             
             <div>
