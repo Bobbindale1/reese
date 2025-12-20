@@ -10,7 +10,7 @@ interface JumpToDateProps {
 
 const MONTHS = [
   { num: 1, name: "January", days: 31 },
-  { num: 2, name: "February", days: 29 },
+  { num: 2, name: "February", days: 28 },
   { num: 3, name: "March", days: 31 },
   { num: 4, name: "April", days: 30 },
   { num: 5, name: "May", days: 31 },

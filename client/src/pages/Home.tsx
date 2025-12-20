@@ -160,6 +160,11 @@ export default function Home() {
               onNavigate={setCurrentDay}
               currentDate={formattedDate}
             />
+            
+            <JumpToDate
+              onNavigate={setCurrentDay}
+              totalDays={videos?.length || 365}
+            />
           </div>
 
           <div className="space-y-6">
@@ -167,11 +172,6 @@ export default function Home() {
               totalWatched={watchedDays.size}
               totalVideos={videos?.length || 365}
               currentStreak={calculateStreak()}
-            />
-            
-            <JumpToDate
-              onNavigate={setCurrentDay}
-              totalDays={videos?.length || 365}
             />
             
             <div>
