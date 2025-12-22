@@ -37,6 +37,10 @@ export default function Home() {
     return new Set();
   });
 
+  const [hasBackup, setHasBackup] = useState(() => {
+    return localStorage.getItem("backupWatchedDays") !== null;
+  });
+
   useEffect(() => {
     localStorage.setItem("viewMode", mode);
   }, [mode]);
@@ -48,6 +52,32 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem("watchedDays", JSON.stringify(Array.from(watchedDays)));
   }, [watchedDays]);
+
+  const handleResetProgress = () => {
+    if (window.confirm("Are you sure you want to reset your progress? Your current progress will be saved and you can undo this.")) {
+      localStorage.setItem("backupWatchedDays", JSON.stringify(Array.from(watchedDays)));
+      localStorage.setItem("backupCurrentDay", currentDay.toString());
+      setWatchedDays(new Set());
+      setCurrentDay(mode === "calendar" ? getDayOfYear() : 1);
+      setHasBackup(true);
+    }
+  };
+
+  const handleUndoReset = () => {
+    if (window.confirm("Restore your previous progress?")) {
+      const backupWatched = localStorage.getItem("backupWatchedDays");
+      const backupDay = localStorage.getItem("backupCurrentDay");
+      if (backupWatched) {
+        setWatchedDays(new Set(JSON.parse(backupWatched)));
+      }
+      if (backupDay) {
+        setCurrentDay(parseInt(backupDay));
+      }
+      localStorage.removeItem("backupWatchedDays");
+      localStorage.removeItem("backupCurrentDay");
+      setHasBackup(false);
+    }
+  };
 
   const handleModeChange = (newMode: ViewMode) => {
     setMode(newMode);
@@ -172,6 +202,9 @@ export default function Home() {
               totalWatched={watchedDays.size}
               totalVideos={videos?.length || 365}
               currentStreak={calculateStreak()}
+              onReset={handleResetProgress}
+              onUndo={handleUndoReset}
+              hasBackup={hasBackup}
             />
             
             <div>

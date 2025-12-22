@@ -1,21 +1,53 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, CheckCircle2, Clock, Flame } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BookOpen, CheckCircle2, Clock, Flame, RotateCcw, Undo2 } from "lucide-react";
 
 interface ProgressDashboardProps {
   totalWatched: number;
   totalVideos: number;
   currentStreak: number;
+  onReset?: () => void;
+  onUndo?: () => void;
+  hasBackup?: boolean;
 }
 
-export function ProgressDashboard({ totalWatched, totalVideos, currentStreak }: ProgressDashboardProps) {
+export function ProgressDashboard({ totalWatched, totalVideos, currentStreak, onReset, onUndo, hasBackup }: ProgressDashboardProps) {
   const percentage = Math.round((totalWatched / totalVideos) * 100);
   const remaining = totalVideos - totalWatched;
 
   return (
     <Card data-testid="card-progress-dashboard">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 flex flex-row items-center justify-between gap-4">
         <CardTitle className="text-lg">Your Progress</CardTitle>
+        <div className="flex gap-2">
+          {hasBackup && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onUndo}
+              data-testid="button-undo-reset"
+              title="Restore previous progress"
+              className="gap-1"
+            >
+              <Undo2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Undo</span>
+            </Button>
+          )}
+          {onReset && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onReset}
+              data-testid="button-reset-progress"
+              title="Reset progress to start over"
+              className="gap-1"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span className="hidden sm:inline">Reset</span>
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-col items-center gap-3">
