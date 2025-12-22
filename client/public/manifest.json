@@ -1,0 +1,17 @@
+{
+  "name": "Reese Chronological Bible: Audio‑Visual Edition",
+  "short_name": "Chronological Bible: Audio‑Visual",
+  "description": "The Reese Chronological Bible presented day-by-day with integrated YouTube readings.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a73e8",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
