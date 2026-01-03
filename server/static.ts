@@ -7,14 +7,12 @@ export function serveStatic(app: Express) {
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
-      `Could not find the build directory: ${distPath}. Did you run "npm run build"?`,
+      `Could not find the build directory: ${distPath}. Did you run "npm run build"?`
     );
   }
 
-  // Serve static assets
   app.use(express.static(distPath));
 
-  // SPA fallback
   app.get("*", (_req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
